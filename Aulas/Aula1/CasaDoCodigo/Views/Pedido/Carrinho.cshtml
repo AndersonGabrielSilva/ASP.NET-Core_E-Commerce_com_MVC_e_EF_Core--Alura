@@ -31,34 +31,35 @@
         @foreach (var item in Model)
         {
 
-             <div class="row row-center linha-produto">
-            <div class="col-md-3">
-                <img class="img-produto-carrinho" src="/images/produtos/large_@(item.Produto.Codigo).jpg" />
-            </div>
-            <div class="col-md-3">@item.Produto.Nome</div>
-            <div class="col-md-2 text-center">R$ @item.PrecoUnitario</div>
-            <div class="col-md-2 text-center">
-                <div class="input-group">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default">
-                            <span class="glyphicon-minus"></span>
-                        </button>
-                    </span>
-                    <input type="text" value="@item.Quantidade"
-                           class="form-control text-center" />
-                    <span class="input-group-btn">
-                        <button class="btn btn-default">
-                            <span class="glyphicon-plus"></span>
-                        </button>
+            <div class="row row-center linha-produto" item-id="@item.Id">
+                <div class="col-md-3">
+                    <img class="img-produto-carrinho" src="/images/produtos/large_@(item.Produto.Codigo).jpg" />
+                </div>
+                <div class="col-md-3">@item.Produto.Nome</div>
+                <div class="col-md-2 text-center">R$ @item.PrecoUnitario</div>
+                <div class="col-md-2 text-center">
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default">
+                                <span class="glyphicon-minus"></span>
+                            </button>
+                        </span>
+                        <input type="text" value="@item.Quantidade"
+                               class="form-control text-center" />
+                        <span class="input-group-btn">
+                            <button class="btn btn-default"
+                                    onclick="clickIncremento(this)">
+                                <span class="glyphicon-plus"></span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    R$ <span class="pull-right" subtotal>
+                        @(item.Quantidade * item.PrecoUnitario)
                     </span>
                 </div>
             </div>
-            <div class="col-md-2">
-                R$ <span class="pull-right" subtotal>
-                    @(item.Quantidade * item.PrecoUnitario)
-                </span>
-            </div>
-        </div>    
 
         }
 
@@ -83,7 +84,7 @@
 <div class="row">
     <div class="col-md-12">
         <div class="pull-right">
-            <a class="btn btn-success"asp-action="carrossel">
+            <a class="btn btn-success" asp-action="carrossel">
                 Adicionar Produtos
             </a>
             <a class="btn btn-success" asp-action="resumo">
@@ -92,3 +93,67 @@
         </div>
     </div>
 </div>
+
+@* Para adicionar um codigo JavaScript é necessario criar uma section *@
+@section Scripts
+{
+
+    @* 1 - Introdução ao Jquery
+        Primeiro começa com o '$', logo apos vem o seletor, que nada mais é do que um elemento do HTML
+
+            $(seletor).action();
+
+        O método parents obtém os "ancestrais" (elementos acima da hierarquia) do elemento. 
+        O método find vai obter os elementos abaixo da hiearquia.
+
+    2 - AJAX
+
+        Definição
+        
+        A JA X
+        
+        A - Asynchronous 
+        JA - JavaScript
+        X - Xml (JSON)
+
+        É uma função do Jquey, para consultas assincronas.
+        Recebe um objeto como parametro, na qual contem 4 atributos.
+        
+        1.url : o endereço do nosso método do controller({Controller/Action}).
+        2.type : o tipo de requisição HTTP que escolhemos (POST)/ o Verbo HTTP.
+        3.contentType: o formato dos dados (JSON).
+        4.data: o objeto que vai levar os dados do cliente para o servidor.
+    *@
+
+
+    <script type="text/javascript">
+        function clickIncremento(btn) {
+
+            //Atraves do parents buscamos algum elemento dos pais daquele item.
+            //ou seja localizar a cima.
+            var linhaItem = $(btn).parents('[item-id]');
+
+            //Atraves do '$' acessamos os metodos do Jquery
+            var itemId = $(linhaItem).attr('item-id');//Com attr é possivel recuperar um atributo do elemento
+
+            //Atravez do find buscamos algum alemto filho, ou seja localizar a baixo
+            var novaQtde = $(linhaItem).find('input').val();
+
+            var data = {
+                id: itemId,
+                Quantidade: novaQtde
+            };
+
+            $.ajax({
+                url: '/pedido/updatequantidade',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data)
+            })
+            //Este comando serve para colocar um breack point dentro de uma função javascript
+            //debugger
+        }
+    </script>
+
+}
+

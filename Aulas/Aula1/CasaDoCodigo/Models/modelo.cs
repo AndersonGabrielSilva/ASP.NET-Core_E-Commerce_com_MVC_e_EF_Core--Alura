@@ -7,9 +7,12 @@ using System.Threading.Tasks;
 
 namespace CasaDoCodigo.Models
 {
+    //Este atributo é necessario para permitir a serialização do do objeto.
+    //
     [DataContract]
     public class BaseModel
     {
+        ///
         [DataMember]
         public int Id { get; protected set; }
     }
@@ -63,15 +66,23 @@ namespace CasaDoCodigo.Models
         public string CEP { get; set; } = "";
     }
 
+    [DataContract]
     public class ItemPedido : BaseModel
     {   
         [Required]
+        [DataMember]
         public Pedido Pedido { get; private set; }
+        
         [Required]
+        [DataMember]
         public Produto Produto { get; private set; }
+        
         [Required]
+        [DataMember]
         public int Quantidade { get; private set; }
+
         [Required]
+        [DataMember]
         public decimal PrecoUnitario { get; private set; }
 
         public ItemPedido()
