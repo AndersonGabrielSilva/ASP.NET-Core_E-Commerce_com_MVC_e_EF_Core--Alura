@@ -1,4 +1,5 @@
 ﻿using CasaDoCodigo.Models;
+using CasaDoCodigo.Models.ViewModels;
 using CasaDoCodigo.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -10,12 +11,15 @@ namespace CasaDoCodigo.Controllers
 {
     public class PedidoController : Controller
     {
-        private IProdutoRepository produtoRepository;
-        private IPedidoRepository pedidoRepository;
-        public PedidoController(IProdutoRepository produtoRepository, IPedidoRepository pedidoRepository)
+        private readonly IProdutoRepository produtoRepository;
+        private readonly IPedidoRepository pedidoRepository;
+        private readonly IItemPedidoRepository ItemPedidoRepository;
+
+        public PedidoController(IProdutoRepository produtoRepository, IPedidoRepository pedidoRepository, IItemPedidoRepository itemPedidoRepository)
         {
             this.produtoRepository = produtoRepository;
             this.pedidoRepository = pedidoRepository;
+            this.ItemPedidoRepository = itemPedidoRepository;
         }
 
 
@@ -32,27 +36,43 @@ namespace CasaDoCodigo.Controllers
                 pedidoRepository.AddItem(codigo);
             }
 
-            Pedido pedido = pedidoRepository.GetPedido();
-    
-            return View(pedido.Itens);
+            var Itens = pedidoRepository.GetPedido().Itens;
+
+            var carrinhoViewModel = new CarrinhoViewModel(Itens);
+
+            return View(carrinhoViewModel);
         }
 
         public IActionResult Cadastro()
         {
-            return View();
-        }
+            var pedido = pedidoRepository.GetPedido();
 
-        public IActionResult Resumo()
-        {
-            Pedido pedido = pedidoRepository.GetPedido();
+            if (pedido == null)
+                return RedirectToAction("Carrossel");
 
-            return View(pedido);
+            return View(pedido.Cadastro);
         }
 
         [HttpPost]
-        public void UpdateQuantidade([FromBody]ItemPedido itemPedido)
+        [ValidateAntiForgeryToken]
+        public IActionResult Resumo(Cadastro cadastro)
         {
+            if (ModelState.IsValid)
+            {
 
+                Pedido pedido = pedidoRepository.UpdateCadastro(cadastro);
+
+                return View(pedido);
+            }
+
+            return RedirectToAction("Cadastro");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public UpdateQuantidadeResponse UpdateQuantidade([FromBody] ItemPedido itemPedido)
+        {
+            return pedidoRepository.UpdateQuantidade(itemPedido);
         }
     }
 }

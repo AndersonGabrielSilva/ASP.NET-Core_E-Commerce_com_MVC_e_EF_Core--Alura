@@ -8,7 +8,8 @@ namespace CasaDoCodigo.Repositories
 {
     public interface IItemPedidoRepository
     {
-
+        ItemPedido GetItemPedido(int itemPedidoId);
+        void RemoveItemPedido(int itemPedidoId);
     }
 
 
@@ -16,6 +17,21 @@ namespace CasaDoCodigo.Repositories
     {
         public ItemPedidoRepository(ApplicationContext context) : base(context)
         {
+        }
+
+        public ItemPedido GetItemPedido(int itemPedidoId)
+        {
+            return dbSet
+                       .Where(x => x.Id == itemPedidoId)
+                       .SingleOrDefault();
+        }
+
+        public void RemoveItemPedido(int itemPedidoId)
+        {
+            var ItemPedidoDB = GetItemPedido(itemPedidoId);
+
+            dbSet.Remove(ItemPedidoDB);
+            context.SaveChanges();
         }
     }
 }
